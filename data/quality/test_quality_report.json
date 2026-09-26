@@ -5,10 +5,13 @@
   "gx_success": true,
   "is_fresh": true,
   "total_rows": 24,
+  "suite_path": "D:\\VinUni\\K4-L3B-Day10-ACE-DataPipelineDataObservability\\data\\quality\\gx\\test_suite.json",
+  "freshness_report_path": "D:\\VinUni\\K4-L3B-Day10-ACE-DataPipelineDataObservability\\data\\quality\\test_freshness_report.json",
   "freshness": {
     "total_rows": 24,
     "stale_rows": 1,
     "stale_ratio": 0.0417,
+    "invalid_age_rows": 0,
     "threshold_days": 180,
     "max_stale_ratio": 0.25,
     "is_fresh": true,
@@ -29,11 +32,12 @@
         "expectation_config": {
           "type": "expect_table_row_count_to_be_between",
           "kwargs": {
-            "batch_id": "papers_source-papers_asset",
-            "min_value": 5,
-            "max_value": 5000
+            "batch_id": "papers_test_source-papers_test_asset",
+            "min_value": 24,
+            "max_value": 24
           },
           "meta": {},
+          "id": "e8ed167d-62ad-4bdd-bcac-ad2b1b923625",
           "severity": "critical"
         },
         "result": {
@@ -51,10 +55,11 @@
         "expectation_config": {
           "type": "expect_column_values_to_not_be_null",
           "kwargs": {
-            "batch_id": "papers_source-papers_asset",
+            "batch_id": "papers_test_source-papers_test_asset",
             "column": "paper_id"
           },
           "meta": {},
+          "id": "c676095d-cbd7-4cec-9be4-82eea7a95d6c",
           "severity": "critical"
         },
         "result": {
@@ -77,10 +82,11 @@
         "expectation_config": {
           "type": "expect_column_values_to_be_unique",
           "kwargs": {
-            "batch_id": "papers_source-papers_asset",
+            "batch_id": "papers_test_source-papers_test_asset",
             "column": "paper_id"
           },
           "meta": {},
+          "id": "be1ac292-a132-4c81-a02c-ad2a07cefd5c",
           "severity": "critical"
         },
         "result": {
@@ -107,10 +113,11 @@
         "expectation_config": {
           "type": "expect_column_values_to_not_be_null",
           "kwargs": {
-            "batch_id": "papers_source-papers_asset",
+            "batch_id": "papers_test_source-papers_test_asset",
             "column": "title"
           },
           "meta": {},
+          "id": "224d2090-dcf9-436e-b4b7-8af8e6b05fd5",
           "severity": "critical"
         },
         "result": {
@@ -133,10 +140,11 @@
         "expectation_config": {
           "type": "expect_column_values_to_not_be_null",
           "kwargs": {
-            "batch_id": "papers_source-papers_asset",
+            "batch_id": "papers_test_source-papers_test_asset",
             "column": "text_for_embedding"
           },
           "meta": {},
+          "id": "0d4e40ca-5cc9-4eec-a59b-2ddfbfb87821",
           "severity": "critical"
         },
         "result": {
@@ -159,11 +167,13 @@
         "expectation_config": {
           "type": "expect_column_value_lengths_to_be_between",
           "kwargs": {
-            "batch_id": "papers_source-papers_asset",
+            "batch_id": "papers_test_source-papers_test_asset",
             "column": "summary",
-            "min_value": 30
+            "min_value": 30,
+            "max_value": 20000
           },
           "meta": {},
+          "id": "cf13f680-dfbb-47e8-a7c1-c82dd249b8b8",
           "severity": "critical"
         },
         "result": {
@@ -204,9 +214,9 @@
         "pandas_data_fingerprint": "23a07c62b77c64c2507b924c1b7d04e1"
       },
       "active_batch_definition": {
-        "datasource_name": "papers_source",
+        "datasource_name": "papers_test_source",
         "data_connector_name": "fluent",
-        "data_asset_name": "papers_asset",
+        "data_asset_name": "papers_test_asset",
         "batch_identifiers": {
           "dataframe": "<DATAFRAME>"
         }
