@@ -53,9 +53,28 @@ def build_clean_dataframe(records: list[PaperRecord], run_date: datetime) -> pd.
        - summary_chars
        - text_for_embedding
     5. Khử trùng lặp theo khóa duy nhất paper_id và lọc bỏ dòng không hợp lệ.
-    6. Sort dataframe và return.
+    6. Sắp xếp theo ngày xuất bản mới nhất trước (stable sort) và return.
     """
     run_date_obj = run_date.date() if isinstance(run_date, datetime) else run_date
+
+    columns = [
+        "paper_id",
+        "title",
+        "summary",
+        "authors",
+        "authors_joined",
+        "categories",
+        "categories_joined",
+        "primary_category",
+        "published",
+        "updated",
+        "abs_url",
+        "pdf_url",
+        "comment",
+        "age_days",
+        "summary_chars",
+        "text_for_embedding",
+    ]
 
     rows: list[dict] = []
     for r in records:
@@ -122,29 +141,13 @@ def build_clean_dataframe(records: list[PaperRecord], run_date: datetime) -> pd.
         )
 
     if not rows:
-        return pd.DataFrame(
-            columns=[
-                "paper_id",
-                "title",
-                "summary",
-                "authors",
-                "authors_joined",
-                "categories",
-                "categories_joined",
-                "primary_category",
-                "published",
-                "updated",
-                "abs_url",
-                "pdf_url",
-                "comment",
-                "age_days",
-                "summary_chars",
-                "text_for_embedding",
-            ]
-        )
+        return pd.DataFrame(columns=columns)
 
-    df = pd.DataFrame(rows)
-    # Khử trùng lặp bản ghi theo khóa duy nhất paper_id
-    df = df.drop_duplicates(subset=["paper_id"], keep="first").reset_index(drop=True)
-    return df
-
+    df = pd.DataFrame(rows, columns=columns)
+    df = df.astype({"age_days": "int64", "summary_chars": "int64"})
+    # Khử trùng lặp bản ghi theo khóa duy nhất paper_id và sắp xếp mới nhất
+    return (
+        df.drop_duplicates(subset=["paper_id"], keep="first")
+        .sort_values(by="published", ascending=False, kind="stable")
+        .reset_index(drop=True)
+    )

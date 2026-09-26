@@ -7,8 +7,11 @@ from pathlib import Path
 import re
 import time
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 from core.config import Settings
+from core.utils import ensure_parent, write_json
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +33,7 @@ class PaperRecord:
 
 def _clean_text(text: str) -> str:
     """Loại bỏ thẻ XML/HTML (như <jats:p>) và chuẩn hóa khoảng trắng."""
-    cleaned = re.sub(r"<[^>]+>", " ", text)
+    cleaned = re.sub(r"<[^>]+>", " ", str(text))
     return " ".join(cleaned.split())
 
 
@@ -116,7 +119,7 @@ def parse_crossref_payload(payload: dict) -> list[PaperRecord]:
         updated = _extract_date(item.get("updated")) or published
 
         # URLs
-        url = item.get("URL") or f"https://doi.org/{paper_id}"
+        url = str(item.get("URL") or f"https://doi.org/{paper_id}").strip()
 
         records.append(
             PaperRecord(
@@ -141,14 +144,16 @@ def fetch_source_records(settings: Settings) -> list[PaperRecord]:
     """Gọi API Crossref (hoặc kích hoạt fallback đọc snapshot mẫu), lưu JSON gốc
     vào data/raw/crossref_response.json và lưu danh sách records vào data/raw/crossref_records.json.
     """
-    raw_response_path = settings.paths.raw_api_response
+    raw_path = settings.paths.raw_api_response
     raw_records_path = settings.paths.raw_records_json
 
     payload: dict | None = None
-    should_fetch = settings.refresh_source or not raw_response_path.exists()
+    raw_bytes: bytes | None = None
 
-    if should_fetch:
-        endpoint = "https://api.crossref.org/works"
+    if not settings.refresh_source and raw_path.exists():
+        raw_bytes = raw_path.read_bytes()
+        payload = json.loads(raw_bytes.decode("utf-8"))
+    else:
         params: dict[str, str | int] = {
             "query": settings.source_query,
             "rows": settings.max_results,
@@ -156,43 +161,45 @@ def fetch_source_records(settings: Settings) -> list[PaperRecord]:
         if settings.source_filter:
             params["filter"] = settings.source_filter
 
-        headers = {
-            "User-Agent": "DataObservabilityLab/1.0 (mailto:student@example.com)"
-        }
+        retry = Retry(
+            total=3,
+            backoff_factor=1,
+            status_forcelist=(429, 500, 502, 503, 504),
+            allowed_methods={"GET"},
+            respect_retry_after_header=True,
+        )
 
-        max_retries = 3
-        for attempt in range(max_retries):
-            try:
-                response = requests.get(endpoint, params=params, headers=headers, timeout=15)
+        try:
+            with requests.Session() as session:
+                session.mount("https://", HTTPAdapter(max_retries=retry))
+                response = session.get(
+                    "https://api.crossref.org/works",
+                    params=params,
+                    timeout=(10, 60),
+                    headers={"User-Agent": "day10-data-observability-lab/0.1 (mailto:student@example.com)"},
+                )
                 if response.status_code == 200:
-                    payload = response.json()
-                    break
-                elif response.status_code in {429, 503}:
-                    logger.warning("Crossref API rate limit hit (%d). Retrying...", response.status_code)
-                    time.sleep(2**attempt)
-                else:
-                    logger.warning("Crossref API returned status %d", response.status_code)
-                    break
-            except requests.RequestException as e:
-                logger.warning("Error connecting to Crossref API: %s. Attempt %d/%d", e, attempt + 1, max_retries)
-                if attempt < max_retries - 1:
-                    time.sleep(2**attempt)
+                    raw_bytes = response.content
+                    payload = json.loads(raw_bytes.decode("utf-8"))
+        except (requests.RequestException, ValueError) as exc:
+            logger.warning("Crossref request failed (%s); attempting local snapshot fallback...", exc)
 
-    if payload is not None:
-        raw_response_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(raw_response_path, "w", encoding="utf-8") as f:
-            json.dump(payload, f, ensure_ascii=False, indent=2)
-    elif raw_response_path.exists():
-        with open(raw_response_path, "r", encoding="utf-8") as f:
-            payload = json.load(f)
-    else:
-        raise RuntimeError("Failed to fetch from Crossref API and no local snapshot available.")
+        if payload is None:
+            if raw_path.exists():
+                logger.info("Using local snapshot from %s", raw_path)
+                raw_bytes = raw_path.read_bytes()
+                payload = json.loads(raw_bytes.decode("utf-8"))
+            else:
+                raise RuntimeError("Failed to fetch from Crossref API and no local snapshot available.")
+
+    if raw_bytes is not None:
+        ensure_parent(raw_path)
+        raw_path.write_bytes(raw_bytes)
 
     records = parse_crossref_payload(payload)
 
-    raw_records_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(raw_records_path, "w", encoding="utf-8") as f:
-        json.dump([asdict(r) for r in records], f, ensure_ascii=False, indent=2)
+    ensure_parent(raw_records_path)
+    write_json(raw_records_path, [asdict(record) for record in records])
 
     return records
 
@@ -207,3 +214,4 @@ def load_raw_records(path: Path) -> list[PaperRecord]:
     elif isinstance(data, dict):
         return parse_crossref_payload(data)
     return []
+
