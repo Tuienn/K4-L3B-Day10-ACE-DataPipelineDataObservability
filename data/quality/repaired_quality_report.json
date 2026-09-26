@@ -1,12 +1,12 @@
 {
-  "report_name": "baseline",
-  "timestamp": "2026-09-26T04:56:25.763283+00:00",
+  "report_name": "repaired",
+  "timestamp": "2026-09-26T04:57:11.723243+00:00",
   "success": true,
   "gx_success": true,
   "is_fresh": true,
   "total_rows": 24,
-  "suite_path": "D:\\DATA\\IT\\AIA\\lab\\K4-L3B-Day10-ACE-DataPipelineDataObservability\\data\\quality\\gx\\baseline_suite.json",
-  "freshness_report_path": "D:\\DATA\\IT\\AIA\\lab\\K4-L3B-Day10-ACE-DataPipelineDataObservability\\data\\quality\\freshness_report.json",
+  "suite_path": "D:\\DATA\\IT\\AIA\\lab\\K4-L3B-Day10-ACE-DataPipelineDataObservability\\data\\quality\\gx\\repaired_suite.json",
+  "freshness_report_path": "D:\\DATA\\IT\\AIA\\lab\\K4-L3B-Day10-ACE-DataPipelineDataObservability\\data\\quality\\repaired_freshness_report.json",
   "freshness": {
     "total_rows": 24,
     "stale_rows": 1,
@@ -32,12 +32,12 @@
         "expectation_config": {
           "type": "expect_table_row_count_to_be_between",
           "kwargs": {
-            "batch_id": "papers_baseline_source-papers_baseline_asset",
+            "batch_id": "papers_repaired_source-papers_repaired_asset",
             "min_value": 24,
             "max_value": 24
           },
           "meta": {},
-          "id": "0040bf68-5441-4f7a-adaf-d2ff88e67ce6",
+          "id": "cede07d4-122f-4608-a8c6-c6eb02527a2b",
           "severity": "critical"
         },
         "result": {
@@ -55,11 +55,11 @@
         "expectation_config": {
           "type": "expect_column_values_to_not_be_null",
           "kwargs": {
-            "batch_id": "papers_baseline_source-papers_baseline_asset",
+            "batch_id": "papers_repaired_source-papers_repaired_asset",
             "column": "paper_id"
           },
           "meta": {},
-          "id": "5466c359-04a0-44b9-926b-8b23bd515eed",
+          "id": "29b2cb15-0182-45f2-8247-2c375386b538",
           "severity": "critical"
         },
         "result": {
@@ -82,11 +82,11 @@
         "expectation_config": {
           "type": "expect_column_values_to_be_unique",
           "kwargs": {
-            "batch_id": "papers_baseline_source-papers_baseline_asset",
+            "batch_id": "papers_repaired_source-papers_repaired_asset",
             "column": "paper_id"
           },
           "meta": {},
-          "id": "805584cc-dd28-41b7-8f9d-379010cf67a0",
+          "id": "5f2df0d3-5fb5-47c4-ad0e-d4d4cb182e07",
           "severity": "critical"
         },
         "result": {
@@ -113,11 +113,11 @@
         "expectation_config": {
           "type": "expect_column_values_to_not_be_null",
           "kwargs": {
-            "batch_id": "papers_baseline_source-papers_baseline_asset",
+            "batch_id": "papers_repaired_source-papers_repaired_asset",
             "column": "title"
           },
           "meta": {},
-          "id": "95339eb9-fafd-4d41-92e1-716debcf7495",
+          "id": "53f31587-e3e7-4834-a9aa-d804704a372e",
           "severity": "critical"
         },
         "result": {
@@ -140,11 +140,11 @@
         "expectation_config": {
           "type": "expect_column_values_to_not_be_null",
           "kwargs": {
-            "batch_id": "papers_baseline_source-papers_baseline_asset",
+            "batch_id": "papers_repaired_source-papers_repaired_asset",
             "column": "text_for_embedding"
           },
           "meta": {},
-          "id": "4a4df3f7-84d3-4d42-a34d-0a4c568e434e",
+          "id": "b4a93f52-b7a2-4f68-bf10-57389297d9d9",
           "severity": "critical"
         },
         "result": {
@@ -167,13 +167,13 @@
         "expectation_config": {
           "type": "expect_column_value_lengths_to_be_between",
           "kwargs": {
-            "batch_id": "papers_baseline_source-papers_baseline_asset",
+            "batch_id": "papers_repaired_source-papers_repaired_asset",
             "column": "summary",
             "min_value": 30,
             "max_value": 20000
           },
           "meta": {},
-          "id": "b521a012-3d55-4079-840d-cb85fdbd7555",
+          "id": "2ae28cbf-6653-4ad1-ba12-67d3004a1b7f",
           "severity": "critical"
         },
         "result": {
@@ -196,7 +196,7 @@
         }
       }
     ],
-    "suite_name": "papers_quality_suite_baseline",
+    "suite_name": "papers_quality_suite_repaired",
     "suite_parameters": {},
     "statistics": {
       "evaluated_expectations": 6,
@@ -210,13 +210,13 @@
         "batch_data": "PandasDataFrame"
       },
       "batch_markers": {
-        "ge_load_time": "20260926T045625.593885Z",
-        "pandas_data_fingerprint": "23a07c62b77c64c2507b924c1b7d04e1"
+        "ge_load_time": "20260926T045711.596921Z",
+        "pandas_data_fingerprint": "b751ecb25ad63d54d5ca62d29040f74d"
       },
       "active_batch_definition": {
-        "datasource_name": "papers_baseline_source",
+        "datasource_name": "papers_repaired_source",
         "data_connector_name": "fluent",
-        "data_asset_name": "papers_baseline_asset",
+        "data_asset_name": "papers_repaired_asset",
         "batch_identifiers": {
           "dataframe": "<DATAFRAME>"
         }
