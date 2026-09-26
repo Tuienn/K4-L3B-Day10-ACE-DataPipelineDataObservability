@@ -92,17 +92,21 @@ class LocalEmbeddingIndex:
         persist_path = settings.paths.chroma_dir
         persist_path.mkdir(parents=True, exist_ok=True)
 
+        if not documents:
+            raise ValueError("Cannot build an empty vector index.")
         embedding_model = MiniLMEmbeddings(settings.embedding_model)
+        # Compute first: a model/download failure must not delete the previous collection.
+        embeddings = embedding_model.embed_documents([document["content"] for document in documents])
         client = chromadb.PersistentClient(path=str(persist_path))
+        from chromadb.errors import NotFoundError
         try:
             client.delete_collection(name=collection_name)
-        except Exception:
+        except NotFoundError:
             pass
         collection = client.create_collection(
             name=collection_name,
             configuration={"hnsw": {"space": "cosine"}},
         )
-        embeddings = embedding_model.embed_documents([document["content"] for document in documents])
         collection.add(
             ids=[document["record_id"] for document in documents],
             embeddings=embeddings,
@@ -139,10 +143,16 @@ class LocalEmbeddingIndex:
         )
 
     def search(self, query: str, top_k: int | None = None) -> list[SearchResult]:
+        limit = self.settings.top_k if top_k is None else top_k
+        if limit <= 0:
+            raise ValueError("top_k must be positive.")
+        count = self.collection.count()
+        if count == 0:
+            return []
         query_embedding = self.embedding_model.embed_query(query)
         results = self.collection.query(
             query_embeddings=[query_embedding],
-            n_results=top_k or self.settings.top_k,
+            n_results=min(limit, count),
             include=["documents", "metadatas", "distances"],
         )
         ids = results.get("ids", [[]])[0]

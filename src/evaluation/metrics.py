@@ -1,16 +1,17 @@
 from __future__ import annotations
 
+from collections import Counter
 from dataclasses import dataclass
+from functools import lru_cache
 from statistics import mean
 import os
 import sys
 import types
 from typing import Any
 
-from datasets import Dataset
 from pydantic import BaseModel, Field
 
-from core.config import Settings
+from core.config import Settings, normalized_provider
 from core.utils import normalize_whitespace, read_json, write_json
 from retrieval.embeddings import MiniLMEmbeddings
 from retrieval.index import LocalEmbeddingIndex
@@ -22,6 +23,7 @@ class JudgeVerdict(BaseModel):
     score: int = Field(ge=1, le=5)
     correct: bool
     reasoning: str
+    backend: str = "llm"
 
 
 @dataclass(frozen=True)
@@ -35,14 +37,17 @@ def _token_f1(reference: str, prediction: str) -> float:
     pred_tokens = normalize_whitespace(prediction).lower().split()
     if not ref_tokens or not pred_tokens:
         return 0.0
-    ref_set = set(ref_tokens)
-    pred_set = set(pred_tokens)
-    overlap = len(ref_set & pred_set)
+    overlap = sum((Counter(ref_tokens) & Counter(pred_tokens)).values())
     if overlap == 0:
         return 0.0
-    precision = overlap / len(pred_set)
-    recall = overlap / len(ref_set)
+    precision = overlap / len(pred_tokens)
+    recall = overlap / len(ref_tokens)
     return 2 * precision * recall / (precision + recall)
+
+
+@lru_cache(maxsize=8)
+def _build_judge(settings: Settings):
+    return build_llm(settings=settings, temperature=0.0).with_structured_output(JudgeVerdict)
 
 
 def _judge_answer(settings: Settings, question: str, reference: str, prediction: str) -> JudgeVerdict:
@@ -59,14 +64,20 @@ Return:
 - short reasoning
 """.strip()
     try:
-        llm = build_llm(settings=settings, temperature=0.0).with_structured_output(JudgeVerdict)
-        return llm.invoke(prompt)
+        if normalized_provider(settings) == "mock":
+            raise NotImplementedError("Mock evaluation uses the heuristic judge.")
+        verdict = _build_judge(settings).invoke(prompt)
+        # Attribute provenance locally, not from the model's self-report.
+        if isinstance(verdict, dict):
+            verdict = JudgeVerdict(**verdict)
+        return verdict.model_copy(update={"backend": "llm"})
     except Exception:
         score = 5 if _token_f1(reference, prediction) >= 0.95 else 3 if _token_f1(reference, prediction) >= 0.5 else 1
         return JudgeVerdict(
             score=score,
             correct=score >= 3,
-            reasoning="Fallback heuristic judge used because the LLM evaluator was unavailable.",
+            reasoning="Heuristic judge used: mock mode or LLM evaluator unavailable.",
+            backend="heuristic",
         )
 
 
@@ -78,6 +89,7 @@ def _run_ragas(settings: Settings, answers: list[dict[str, Any]]) -> dict[str, A
             shim = types.ModuleType("langchain_community.chat_models.vertexai")
             shim.ChatVertexAI = type("ChatVertexAI", (), {})
             sys.modules["langchain_community.chat_models.vertexai"] = shim
+        from datasets import Dataset
         from ragas import evaluate
         from ragas.metrics import answer_relevancy, context_precision, context_recall, faithfulness
 
@@ -108,9 +120,12 @@ def evaluate_pipeline(
     answers_output_path,
 ) -> EvaluationBundle:
     test_set = read_json(test_set_path)
+    if not test_set:
+        raise ValueError("Evaluation set is empty; generate it before evaluating.")
     answers: list[dict[str, Any]] = []
 
-    for item in test_set:
+    for number, item in enumerate(test_set, start=1):
+        print(f"[evaluation] {number}/{len(test_set)}: {item['id']}", flush=True)
         result = answer_question(item["question"], settings=settings, index=index)
         judge = _judge_answer(settings, item["question"], item["ground_truth"], result.answer)
         retrieval_hit = any(doc_id in item["ground_truth_doc_ids"] for doc_id in result.retrieved_doc_ids)
@@ -132,6 +147,10 @@ def evaluate_pipeline(
 
     summary = {
         "samples": len(answers),
+        "retrieval_mode": "semantic_with_exact_title_boost",
+        "token_f1_method": "whitespace_lowercase_multiset_v1",
+        "judge_llm_samples": sum(item["judge"]["backend"] == "llm" for item in answers),
+        "judge_heuristic_samples": sum(item["judge"]["backend"] == "heuristic" for item in answers),
         "retrieval_hit_rate": mean(1.0 if item["retrieval_hit"] else 0.0 for item in answers),
         "mean_token_f1": mean(item["token_f1"] for item in answers),
         "judge_accuracy": mean(1.0 if item["judge"]["correct"] else 0.0 for item in answers),

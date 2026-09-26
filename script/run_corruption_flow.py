@@ -1,7 +1,4 @@
-from __future__ import annotations
-
-from pipelines.corruption_flow import main
-
+from pipelines.cli import main
 
 if __name__ == "__main__":
-    main()
+    main("corruption")
