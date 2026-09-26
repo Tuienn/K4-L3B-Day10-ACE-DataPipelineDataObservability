@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from core.utils import ensure_parent, write_text
+from core.utils import write_text
 
 
 def generate_phase1_report(
@@ -14,79 +14,45 @@ def generate_phase1_report(
     quality: dict[str, Any],
     freshness: dict[str, Any],
 ) -> None:
-    """Tạo báo cáo markdown chi tiết cho Phase 1 (Baseline Pipeline)."""
-    target_path = Path(report_path)
-    now_str = datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S UTC")
-
-    hit_rate = metrics.get("retrieval_hit_rate", 0.0)
-    token_f1 = metrics.get("mean_token_f1", 0.0)
-    judge_acc = metrics.get("judge_accuracy", 0.0)
-    judge_score = metrics.get("mean_judge_score", 0.0)
-    samples = metrics.get("samples", 0)
-
-    gx_success = quality.get("gx_success", quality.get("success", False))
-    overall_quality = quality.get("success", False)
-    stats = quality.get("statistics", {})
-    evaluated = stats.get("evaluated_expectations", 6)
-    passed_exp = stats.get("successful_expectations", 6 if gx_success else 0)
-
-    is_fresh = freshness.get("is_fresh", True)
-    stale_rows = freshness.get("stale_rows", 0)
-    total_fresh_rows = freshness.get("total_rows", 24)
-    stale_ratio = freshness.get("stale_ratio", 0.0)
-    latest_pub = freshness.get("latest_published", "N/A")
-    oldest_pub = freshness.get("oldest_published", "N/A")
-
-    content = f"""# Báo Cáo Kết Quả Baseline Pipeline (Phase 1)
-
-> **Thời gian tạo:** {now_str}  
-> **Trạng thái toàn tuyến:** {'✅ THÀNH CÔNG (PASSED)' if overall_quality and hit_rate >= 0.9 else '⚠️ CẢNH BÁO'}
-
----
-
-## 1. Tổng Quan Nguồn Dữ Liệu & Thu Thập (Ingestion & Lineage)
-- **Nguồn dữ liệu:** {source_summary.get('source_api', 'Crossref REST API')}
-- **Truy vấn nguồn:** `{source_summary.get('source_query', 'N/A')}`
-- **Tổng số bản ghi thu thập:** {source_summary.get('raw_records_count', total_fresh_rows)}
-- **Bản ghi sau khi làm sạch:** {source_summary.get('clean_records_count', total_fresh_rows)}
-- **Độ tươi mới xuất bản:** Từ `{oldest_pub}` đến `{latest_pub}`
-- **Bảo toàn dữ liệu thô (Raw Preservation):**
-  - Raw JSON API response: `data/raw/crossref_response.json`
-  - Raw Parsed records: `data/raw/crossref_records.json`
-
----
-
-## 2. Kết Quả Kiểm Định Chất Lượng Dữ Liệu (Great Expectations 1.x & Freshness SLA)
-
-| Chốt kiểm soát (Quality Gate) | Tiêu chuẩn kiểm định | Kết quả | Trạng thái |
-| :--- | :--- | :---: | :---: |
-| **Row Count** | Giới hạn số dòng cấu hình (24) | {total_fresh_rows} dòng | {'✅ PASS' if gx_success else '❌ FAIL'} |
-| **Not Null Columns** | `paper_id`, `title`, `text_for_embedding` không null | 0 null | {'✅ PASS' if gx_success else '❌ FAIL'} |
-| **Unique paper_id** | Mỗi bài báo có DOI duy nhất | 100% unique | {'✅ PASS' if gx_success else '❌ FAIL'} |
-| **Summary Length** | Độ dài summary >= 30 ký tự | >= 30 ký tự | {'✅ PASS' if gx_success else '❌ FAIL'} |
-| **Freshness SLA** | Tỷ lệ bài quá hạn (>180 ngày) <= 25% | {stale_ratio * 100:.1f}% ({stale_rows}/{total_fresh_rows}) | {'✅ PASS' if is_fresh else '❌ FAIL'} |
-| **Tổng thể Quality Gate** | GX 1.x + Freshness SLA đồng thời đạt | {'ĐẠT' if overall_quality else 'KHÔNG ĐẠT'} | {'✅ PASSED' if overall_quality else '❌ FAILED'} |
-
-*Chi tiết Great Expectations:* Đã kiểm định {evaluated} expectations, thành công {passed_exp}/{evaluated}.
-
----
-
-## 3. Hiệu Năng RAG Retrieval & Chất Lượng Trả Lời (Baseline Benchmarks)
-
-| Chỉ số đánh giá | Giá trị đạt được | Kỳ vọng | Đánh giá |
-| :--- | :---: | :---: | :--- |
-| **Retrieval Hit Rate** | **{hit_rate:.4f} ({hit_rate * 100:.1f}%)** | >= 90% | {'✅ Xuất sắc' if hit_rate >= 0.9 else '⚠️ Cần cải thiện'} |
-| **Mean Token F1** | **{token_f1:.4f} ({token_f1 * 100:.1f}%)** | >= 85% | {'✅ Xuất sắc' if token_f1 >= 0.85 else '⚠️ Cần cải thiện'} |
-| **Judge Accuracy** | **{judge_acc:.4f} ({judge_acc * 100:.1f}%)** | >= 80% | {'✅ Đạt chuẩn' if judge_acc >= 0.8 else '⚠️ Cần cải thiện'} |
-| **Mean Judge Score** | **{judge_score:.2f} / 5.0** | >= 4.0 | {'✅ Chất lượng cao' if judge_score >= 4.0 else '⚠️ Cần cải thiện'} |
-| **Tổng số câu hỏi test** | **{samples} câu** | 10 câu | Phân bổ qua 4 nghiệp vụ: summary, authors, date, categories |
-
----
-
-## 4. Kết Luận Phase 1
-Dữ liệu sạch đã vượt qua toàn bộ 4 hàng rào kiểm định chất lượng của Great Expectations 1.x và thỏa mãn Freshness SLA. Hệ thống RAG đạt độ chính xác truy xuất và trả lời tối đa trên tập kiểm thử chuẩn hóa.
-"""
-    write_text(target_path, content)
+    """Write the baseline source, evaluation, quality and freshness summary."""
+    lines = ["# Phase 1: Baseline Pipeline", "", "## Source and indexing", ""]
+    for name, value in source_summary.items():
+        lines.append(f"- {name}: {value}")
+    lines.extend([
+        "", "## Baseline RAG evaluation", "",
+        "| Metric | Value |", "| --- | ---: |",
+        f"| Samples | {metrics['samples']} |",
+        f"| Retrieval Hit Rate | {metrics['retrieval_hit_rate']:.2%} |",
+        f"| Mean Token F1 | {metrics['mean_token_f1']:.4f} |",
+        f"| Judge accuracy | {metrics['judge_accuracy']:.2%} |",
+        f"| Mean judge score | {metrics['mean_judge_score']:.4f} |",
+        "", f"Ragas: {metrics.get('ragas', {})}",
+        "", "## Great Expectations Quality Gate", "",
+        f"- Overall gate: {'PASS' if quality['success'] else 'FAIL'}",
+        f"- Great Expectations: {'PASS' if quality['gx_success'] else 'FAIL'}",
+        f"- Evaluated expectations: {quality['statistics']['evaluated_expectations']}",
+        f"- Successful expectations: {quality['statistics']['successful_expectations']}",
+        f"- Failed expectations: {quality['statistics']['unsuccessful_expectations']}",
+    ])
+    failures = [
+        result for result in quality.get('validation_results', {}).get('results', [])
+        if not result['success']
+    ]
+    for result in failures:
+        config = result.get('expectation_config', {})
+        lines.append(f"- Failed check: {config.get('type', 'unknown')} {config.get('kwargs', {})}")
+    lines.extend([
+        "", "## Freshness SLA", "",
+        f"- Status: {'PASS' if freshness['is_fresh'] else 'FAIL'}",
+        f"- Age threshold: {freshness['threshold_days']} days",
+        f"- Stale papers: {freshness['stale_rows']} / {freshness['total_rows']}",
+        f"- Stale ratio: {freshness['stale_ratio']:.2%}",
+        f"- Maximum stale ratio: {freshness['max_stale_ratio']:.2%}",
+        f"- Latest publication: {freshness['latest_published']}",
+        f"- Oldest publication: {freshness['oldest_published']}",
+        "",
+    ])
+    write_text(report_path, "\n".join(lines))
 
 
 def generate_corruption_report(
