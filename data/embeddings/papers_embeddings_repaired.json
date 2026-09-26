@@ -1,8 +1,8 @@
 {
   "backend": "chroma",
   "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
-  "persist_path": "C:\\Users\\Admin\\Documents\\testvscode\\K4-L3B-Day10-ACE-DataPipelineDataObservability\\data\\chroma",
-  "collection_name": "papers-baseline",
+  "persist_path": "D:\\DATA\\IT\\AIA\\lab\\K4-L3B-Day10-ACE-DataPipelineDataObservability\\data\\chroma",
+  "collection_name": "papers-repaired",
   "documents": [
     {
       "record_id": "10.1145/3637528.3671812::0",

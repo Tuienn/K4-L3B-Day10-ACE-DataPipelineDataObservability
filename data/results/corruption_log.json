@@ -1,0 +1,224 @@
+{
+  "input_rows": 24,
+  "output_rows": 21,
+  "operations": [
+    {
+      "operation": "drop_latest_records",
+      "affected_count": 5,
+      "rows": [
+        {
+          "row_index": 0,
+          "paper_id": "10.1145/3637528.3671812",
+          "before": {
+            "published": "2026-07-22"
+          },
+          "after": null
+        },
+        {
+          "row_index": 1,
+          "paper_id": "10.1145/3637528.3671808",
+          "before": {
+            "published": "2026-07-19"
+          },
+          "after": null
+        },
+        {
+          "row_index": 2,
+          "paper_id": "10.1145/3637528.3671804",
+          "before": {
+            "published": "2026-07-05"
+          },
+          "after": null
+        },
+        {
+          "row_index": 3,
+          "paper_id": "10.1145/3637528.3671807",
+          "before": {
+            "published": "2026-06-25"
+          },
+          "after": null
+        },
+        {
+          "row_index": 4,
+          "paper_id": "10.1145/3637528.3671802",
+          "before": {
+            "published": "2026-06-12"
+          },
+          "after": null
+        }
+      ]
+    },
+    {
+      "operation": "blank_summary",
+      "affected_count": 2,
+      "rows": [
+        {
+          "row_index": 0,
+          "paper_id": "10.1145/3637528.3671824",
+          "before": {
+            "summary": "An extended empirical study on tatic benchmarks fail to capture domain drift in enterprise knowledge bases. We establish a synthetic test generator that auto-creates paired evaluation sets whenever new corpora are ingested Further analysis on scaling parameters."
+          },
+          "after": {
+            "summary": ""
+          }
+        },
+        {
+          "row_index": 1,
+          "paper_id": "10.1145/3637528.3671823",
+          "before": {
+            "summary": "An extended empirical study on ense vector search excels at conceptual similarity but struggles with exact acronyms and serial numbers. Reciprocal Rank Fusion of sparse lexical scores and dense embeddings achieves optimal recall Further analysis on scaling parameters."
+          },
+          "after": {
+            "summary": ""
+          }
+        }
+      ]
+    },
+    {
+      "operation": "inject_noise",
+      "affected_count": 2,
+      "rows": [
+        {
+          "row_index": 2,
+          "paper_id": "10.1145/3637528.3671822",
+          "before": {
+            "summary": "An extended empirical study on mbedding quality checks directly into data pipelines enables fail-closed governance. We show how Great Expectations suites catch schema drifts and null fields before documents reach the embedding model Further analysis on scaling parameters."
+          },
+          "after": {
+            "summary": "An extended empirical study on mbedding quality checks directly into data pipelines enables fail-closed governance. We show how Great Expectations suites catch schema drifts and null fields before documents reach the embedding model Further analysis on scaling parameters. [CORRUPTED_NOISE] ###@@@ xqzv-9917"
+          }
+        },
+        {
+          "row_index": 3,
+          "paper_id": "10.1145/3637528.3671821",
+          "before": {
+            "summary": "An extended empirical study on ierarchical and semantic boundary chunking preserves code block contexts and markdown headings. Our benchmark demonstrates superior top-1 recall compared to fixed character length sliding windows Further analysis on scaling parameters."
+          },
+          "after": {
+            "summary": "An extended empirical study on ierarchical and semantic boundary chunking preserves code block contexts and markdown headings. Our benchmark demonstrates superior top-1 recall compared to fixed character length sliding windows Further analysis on scaling parameters. [CORRUPTED_NOISE] ###@@@ xqzv-9917"
+          }
+        }
+      ]
+    },
+    {
+      "operation": "truncate_title",
+      "affected_count": 2,
+      "rows": [
+        {
+          "row_index": 4,
+          "paper_id": "10.1145/3637528.3671810",
+          "before": {
+            "title": "Automated Data Quality Profiling with Great Expectations in CI/CD"
+          },
+          "after": {
+            "title": "Automat"
+          }
+        },
+        {
+          "row_index": 5,
+          "paper_id": "10.1145/3637528.3671820",
+          "before": {
+            "title": "Advanced Perspectives on Multi-Agent Consensus for High-Stakes Fact Verification"
+          },
+          "after": {
+            "title": "Advance"
+          }
+        }
+      ]
+    },
+    {
+      "operation": "stale_date",
+      "affected_count": 6,
+      "rows": [
+        {
+          "row_index": 6,
+          "paper_id": "10.1145/3637528.3671819",
+          "before": {
+            "published": "2026-06-07",
+            "age_days": 111
+          },
+          "after": {
+            "published": "2025-06-07",
+            "age_days": 476
+          }
+        },
+        {
+          "row_index": 7,
+          "paper_id": "10.1145/3637528.3671818",
+          "before": {
+            "published": "2026-06-06",
+            "age_days": 112
+          },
+          "after": {
+            "published": "2025-06-06",
+            "age_days": 477
+          }
+        },
+        {
+          "row_index": 8,
+          "paper_id": "10.1145/3637528.3671817",
+          "before": {
+            "published": "2026-06-05",
+            "age_days": 113
+          },
+          "after": {
+            "published": "2025-06-05",
+            "age_days": 478
+          }
+        },
+        {
+          "row_index": 9,
+          "paper_id": "10.1145/3637528.3671816",
+          "before": {
+            "published": "2026-06-04",
+            "age_days": 114
+          },
+          "after": {
+            "published": "2025-06-04",
+            "age_days": 479
+          }
+        },
+        {
+          "row_index": 10,
+          "paper_id": "10.1145/3637528.3671815",
+          "before": {
+            "published": "2026-06-03",
+            "age_days": 115
+          },
+          "after": {
+            "published": "2025-06-03",
+            "age_days": 480
+          }
+        },
+        {
+          "row_index": 11,
+          "paper_id": "10.1145/3637528.3671814",
+          "before": {
+            "published": "2026-06-02",
+            "age_days": 116
+          },
+          "after": {
+            "published": "2025-06-02",
+            "age_days": 481
+          }
+        }
+      ]
+    },
+    {
+      "operation": "duplicate_rows",
+      "affected_count": 2,
+      "rows": [
+        {
+          "source_row_index": 17,
+          "duplicate_row_index": 19,
+          "paper_id": "10.1145/3637528.3671803"
+        },
+        {
+          "source_row_index": 18,
+          "duplicate_row_index": 20,
+          "paper_id": "10.1145/3637528.3671805"
+        }
+      ]
+    }
+  ]
+}
