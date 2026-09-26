@@ -1,6 +1,6 @@
 {
   "report_name": "repaired",
-  "timestamp": "2026-09-26T04:57:11.723243+00:00",
+  "timestamp": "2026-09-26T05:16:39.927781+00:00",
   "success": true,
   "gx_success": true,
   "is_fresh": true,
@@ -37,7 +37,7 @@
             "max_value": 24
           },
           "meta": {},
-          "id": "cede07d4-122f-4608-a8c6-c6eb02527a2b",
+          "id": "a1c3a401-7e90-4368-bc93-42bb8b39e24c",
           "severity": "critical"
         },
         "result": {
@@ -59,7 +59,7 @@
             "column": "paper_id"
           },
           "meta": {},
-          "id": "29b2cb15-0182-45f2-8247-2c375386b538",
+          "id": "3b875d2a-881c-4cdc-a93e-c37b231e58df",
           "severity": "critical"
         },
         "result": {
@@ -86,7 +86,7 @@
             "column": "paper_id"
           },
           "meta": {},
-          "id": "5f2df0d3-5fb5-47c4-ad0e-d4d4cb182e07",
+          "id": "ac38dc85-4cf4-46e4-a61b-9fe644e43cea",
           "severity": "critical"
         },
         "result": {
@@ -117,7 +117,7 @@
             "column": "title"
           },
           "meta": {},
-          "id": "53f31587-e3e7-4834-a9aa-d804704a372e",
+          "id": "575ffd6c-6b90-4c6f-9681-6a896521851d",
           "severity": "critical"
         },
         "result": {
@@ -144,7 +144,7 @@
             "column": "text_for_embedding"
           },
           "meta": {},
-          "id": "b4a93f52-b7a2-4f68-bf10-57389297d9d9",
+          "id": "a830ea21-04c5-447e-8f10-2872bc0e1310",
           "severity": "critical"
         },
         "result": {
@@ -173,7 +173,7 @@
             "max_value": 20000
           },
           "meta": {},
-          "id": "2ae28cbf-6653-4ad1-ba12-67d3004a1b7f",
+          "id": "988d48f7-dd8f-4ffd-9614-72a9de95dc9b",
           "severity": "critical"
         },
         "result": {
@@ -210,7 +210,7 @@
         "batch_data": "PandasDataFrame"
       },
       "batch_markers": {
-        "ge_load_time": "20260926T045711.596921Z",
+        "ge_load_time": "20260926T051639.782609Z",
         "pandas_data_fingerprint": "b751ecb25ad63d54d5ca62d29040f74d"
       },
       "active_batch_definition": {

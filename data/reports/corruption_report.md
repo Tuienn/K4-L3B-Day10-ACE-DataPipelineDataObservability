@@ -1,6 +1,6 @@
 # Báo Cáo Đối Chiếu 3 Trạng Thái: Baseline vs Corrupted vs Repaired
 
-> **Thời gian thực thi:** 2026-09-26 04:57:11 UTC  
+> **Thời gian thực thi:** 2026-09-26 05:16:39 UTC  
 > **Mục tiêu:** Chứng minh hiện tượng **Silent Failure** khi dữ liệu bị lỗi, vai trò cảnh báo của **Data Quality Gate (GX 1.x)** và năng lực tự phục hồi an toàn (**Idempotent Repair**).
 
 ---
