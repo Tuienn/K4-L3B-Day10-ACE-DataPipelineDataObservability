@@ -2,6 +2,7 @@
   "total_rows": 24,
   "stale_rows": 1,
   "stale_ratio": 0.0417,
+  "invalid_age_rows": 0,
   "threshold_days": 180,
   "max_stale_ratio": 0.25,
   "is_fresh": true,

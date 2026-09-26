@@ -5,7 +5,7 @@
 - source_api: Crossref REST API
 - source_query: agentic retrieval augmented generation large language model
 - source_filter: from-pub-date:2026-03-30,has-abstract:true
-- run_date: 2026-09-26T04:22:35.248314+00:00
+- run_date: 2026-09-26T04:50:25.762174+00:00
 - raw_records: 24
 - clean_records: 24
 - indexed_documents: 24
